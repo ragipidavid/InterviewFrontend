@@ -16,6 +16,7 @@ function App() {
 
   return (
     <div className="App">
+      <h1>Interview Buddy</h1>
       <h1>Data from Backend:</h1>
       {data ? (
         <pre>{JSON.stringify(data, null, 2)}</pre>  // Display the backend data
