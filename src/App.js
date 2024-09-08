@@ -1,28 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from "react";
+import InterviewPractice from "./components/interview-practice";
 
 function App() {
-  const [data, setData] = useState(null);
-
-  useEffect(() => {
-    axios.get('http://localhost:3000/api')  // Call the backend API
-      .then(response => {
-        setData(response.data);  // Set the response data
-      })
-      .catch(error => {
-        console.error('Error fetching data from the backend', error);
-      });
-  }, []);
-
   return (
-    <div className="App">
-      <h1>Interview Buddy</h1>
-      <h1>Data from Backend:</h1>
-      {data ? (
-        <pre>{JSON.stringify(data, null, 2)}</pre>  // Display the backend data
-      ) : (
-        <p>Loading...</p>
-      )}
+    <div className="App bg-white text-black min-h-screen">
+      <h1 className="text-3xl font-bold text-black p-4 text-center border-b border-gray-200">
+        Interview Buddy
+      </h1>
+      <InterviewPractice />
     </div>
   );
 }
