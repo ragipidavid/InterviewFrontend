@@ -18,7 +18,7 @@ export default function InterviewPractice() {
   }
 
   return (
-    <div className="container mx-auto p-4 h-screen flex flex-col lg:flex-row gap-4 bg-white text-black">
+    <div className="container mx-auto p-4 flex flex-col lg:flex-row gap-4 bg-white text-black h-[calc(100vh-4rem)]">
       {/* Left side */}
       <div className="lg:w-1/2 flex flex-col gap-4">
         {/* Question section */}
