@@ -1,37 +1,71 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 
 const TextToSpeech = ({ text }) => {
+  const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const speechSynthesis = useRef(window.speechSynthesis);
-  const utteranceRef = useRef(null);
+  const audioRef = useRef(new Audio());
 
-  useEffect(() => {
-    utteranceRef.current = new SpeechSynthesisUtterance(text);
-    utteranceRef.current.onend = () => setIsPlaying(false);
+  const generateAndPlaySpeech = async () => {
+    if (isLoading || isPlaying) return;
 
-    return () => {
-      speechSynthesis.current.cancel();
-    };
-  }, [text]);
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:3001/text-to-speech', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate speech');
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      audioRef.current.src = audioUrl;
+      audioRef.current.onended = () => setIsPlaying(false);
+      audioRef.current.onplay = () => setIsPlaying(true);
+      audioRef.current.onpause = () => setIsPlaying(false);
+      
+      await audioRef.current.play();
+    } catch (error) {
+      console.error("Error generating or playing speech:", error);
+      alert("An error occurred while generating or playing the speech.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const togglePlayPause = () => {
     if (isPlaying) {
-      speechSynthesis.current.cancel();
-      setIsPlaying(false);
+      audioRef.current.pause();
+    } else if (audioRef.current.src) {
+      audioRef.current.play();
     } else {
-      speechSynthesis.current.speak(utteranceRef.current);
-      setIsPlaying(true);
+      generateAndPlaySpeech();
     }
   };
 
   return (
     <button 
-      className="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
+      className="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50"
       onClick={togglePlayPause}
-      aria-label={isPlaying ? 'Pause' : 'Play'}
+      disabled={isLoading}
+      aria-label={isLoading ? 'Generating speech' : (isPlaying ? 'Pause' : 'Play')}
     >
       <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {isPlaying ? (
+        {isLoading ? (
+          <>
+            <rect x="6" y="4" width="4" height="16" fill="currentColor" opacity="0.5">
+              <animate attributeName="opacity" values="0.5;1;0.5" dur="1s" repeatCount="indefinite" />
+            </rect>
+            <rect x="14" y="4" width="4" height="16" fill="currentColor" opacity="0.5">
+              <animate attributeName="opacity" values="1;0.5;1" dur="1s" repeatCount="indefinite" />
+            </rect>
+          </>
+        ) : isPlaying ? (
           <>
             <rect x="6" y="4" width="4" height="16" fill="currentColor">
               <animate attributeName="height" values="16;4;16" dur="1s" repeatCount="indefinite" />
