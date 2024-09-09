@@ -121,4 +121,4 @@ const TextToSpeech = ({ text }) => {
   );
 };
 
-export default TextToSpeech;
+export default TextToSpeech;  
